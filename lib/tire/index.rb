@@ -85,6 +85,13 @@ module Tire
 
     def store(*args)
       document, options = args
+      options ||= {}
+
+      [:percolate, :ttl, :timestamp].each do |o|
+        opt = document.delete(o)
+        options[o] = opt if opt
+      end
+
       type = get_type_from_document(document)
 
       if options
@@ -95,9 +102,13 @@ module Tire
       id       = get_id_from_document(document)
       document = convert_document_to_json(document)
 
-      url  = id ? "#{self.url}/#{type}/#{id}" : "#{self.url}/#{type}/"
-      url += "?percolate=#{percolate}" if percolate
-
+      url  = id ? "#{self.url}/#{type}/#{id}?" : "#{self.url}/#{type}/?"
+      #url += "?" if percolate or ttl
+      url += "percolate=#{percolate}&" if percolate
+      url += "ttl=#{options[:ttl]}&" if options[:ttl]
+      url += "timestamp=#{options[:timestamp]}&" if options[:timestamp]
+      url = url.gsub(/&\z|\\?\z/, '')
+      puts url
       @response = Configuration.client.post url, document
       MultiJson.decode(@response.body)
 
