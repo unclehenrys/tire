@@ -108,7 +108,6 @@ module Tire
       url += "ttl=#{options[:ttl]}&" if options[:ttl]
       url += "timestamp=#{options[:timestamp]}&" if options[:timestamp]
       url = url.gsub(/&\z|\\?\z/, '')
-      puts url
       @response = Configuration.client.post url, document
       MultiJson.decode(@response.body)
 
